@@ -18,7 +18,7 @@ function App() {
   const [data, setData] = useState<Data>({folders: [], files: [], loading: true, error: ''});
 
   useEffect(() => {
-    const filePath = new URLSearchParams(location.search).get('pathname') ?? '';
+    const filePath = location.pathname === '/' ? '' : location.pathname;
 
     setFilePath(filePath);
     setData({folders: [], files: [], loading: true, error: ''});
@@ -38,8 +38,8 @@ function App() {
   }, [location]);
 
   const isFirstFolder = filePath === '';
-  const upperFileTo = `/?pathname=${filePath.split('/').slice(0, -1).join('/')}`;
-  const folderLinkTo = (name: string) => `/?pathname=${filePath}/${name}`
+  const upperFileTo = `${filePath.split('/').slice(0, -1).join('/')}`;
+  const folderLinkTo = (name: string) => `${filePath}/${name}`
   
   return (
     <>
