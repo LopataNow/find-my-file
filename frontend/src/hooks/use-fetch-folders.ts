@@ -18,10 +18,10 @@ const useFetchFolders = (filePath: string) => {
             setData({ folders: [], files: [], loading: true, error: '' });
             const result = await fetchFoldersByPath(filePath);
             setData({
-            folders: result.filter((item: FileInfo | FolderInfo) => item.isDirectory) as FolderInfo[],
-            files: result.filter((item: FileInfo | FolderInfo) => !item.isDirectory) as FileInfo[],
-            loading: false,
-            error: ''
+                folders: result.filter((item: FileInfo | FolderInfo) => item.isDirectory) as FolderInfo[],
+                files: result.filter((item: FileInfo | FolderInfo) => !item.isDirectory) as FileInfo[],
+                loading: false,
+                error: ''
             });
         } catch (error) {
             setData({ folders: [], files: [], loading: false, error: error });
