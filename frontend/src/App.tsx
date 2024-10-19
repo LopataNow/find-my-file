@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
-import useFetchFolders from "./hooks/use-fetch-folders";
+import { fetchFoldersByPath, FileInfo, FolderInfo } from "./calls/folder-calls";
+import useFetchData from "./hooks/use-fetch-data";
 
 function App() {
   const location = useLocation();
-  
   const [filePath, setFilePath] = useState('');
-  const {files, folders, loading, error} = useFetchFolders(filePath);
+  const {data, loading, error} = useFetchData<{files: FileInfo[], folders: FolderInfo[]}>(
+    ['files-folders', filePath],
+    () => fetchFoldersByPath(filePath).then((data) => {
+      return {
+        files: data.filter((file) => !file.isDirectory) as FileInfo[],
+        folders: data.filter((folder) => folder.isDirectory) as FolderInfo[],
+      };
+  }));
+  const files = data?.files || [];
+  const folders = data?.folders || [];
 
   useEffect(() => {
     const filePath = location.pathname === '/' ? '' : location.pathname;
