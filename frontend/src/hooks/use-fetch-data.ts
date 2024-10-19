@@ -42,7 +42,7 @@ function useFetchData<T>(dependecies: any[], fetch: ()=>Promise<T>): FetchData<T
 
     useEffect(() => {
         const fetchData = async () => {
-        if (getDataMap(dependecies)?.data) {
+        if (getDataMap(dependecies)?.data || getDataMap(dependecies)?.loading) {
             return;
         }
 
