@@ -63,7 +63,7 @@ function useFetchData<T>(dependecies: any[], fetch: ()=>Promise<T>): FetchData<T
         fetchData();
     }, [fetchNemo]);
 
-    return getDataMap(dependecies);
+    return data;
 };
 
 export default useFetchData;
