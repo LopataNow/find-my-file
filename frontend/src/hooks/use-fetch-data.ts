@@ -11,59 +11,67 @@ export interface FetchData<T> {
 const dataMap = new Map<string, FetchData<any>>();
 const subscriptions: any[] = [];
 
-function setDataMap<T>(dependecies: any[], data: FetchData<T>) {
-    dataMap.set(dependecies.map((d) => d.toString()).join('-'), data);
+function setDataMap<T>(dependencies: any[], data: FetchData<T>) {
+    dataMap.set(dependencies.map((d) => d.toString()).join('-'), data);
 }
 
-function getDataMap<T>(dependecies: any[]): FetchData<T> {
-    return dataMap.get(dependecies.map((d) => d.toString()).join('-')) || { data: undefined, loading: false };
+function getDataMap<T>(dependencies: any[]): FetchData<T>  | undefined {
+    return dataMap.get(dependencies.map((d) => d.toString()).join('-'));
 }
 
-function updateSupcruptions() {
+function updateSubscriptions() {
     for (const subscription of subscriptions) {
-        subscription({});
+        subscription();
     }
 }
 
-function useFetchData<T>(dependecies: any[], fetch: ()=>Promise<T>): FetchData<T> {
-    const [, setData] = useState({});
+function subscribe(listener: any) {
+    subscriptions.push(listener);
 
-    const fetchNemo = useCallback(fetch, dependecies);
+    return function unsubscribe() {
+        const index = subscriptions.indexOf(listener);
+        if (index !== -1) {
+            subscriptions.splice(index, 1);
+        }
+    }
+}
+
+function useFetchData<T>(dependencies: any[], fetch: ()=>Promise<T>): FetchData<T> {
+    const [, setEptyState] = useState({});
+
+    const fetchNemo = useCallback(fetch, dependencies);
 
     useEffect(() => {
-        subscriptions.push(setData);
+        const unsubscribe = subscribe(() => setEptyState({}));
         return () => {
-            const index = subscriptions.indexOf(setData);
-            if (index !== -1) {
-                subscriptions.splice(index, 1);
-            }
+            unsubscribe();
         };
     }, []);
 
     useEffect(() => {
         const fetchData = async () => {
-        if (getDataMap(dependecies)?.data || getDataMap(dependecies)?.loading) {
+        if (getDataMap(dependencies) || getDataMap(dependencies)?.loading) {
             return;
         }
 
         try {
-            updateSupcruptions();
-            setDataMap(dependecies, { data: undefined, loading: true, error: '' });
+            updateSubscriptions();
+            setDataMap(dependencies, { data: undefined, loading: true, error: '' });
 
             const result = await fetchNemo();
-            updateSupcruptions();
+            updateSubscriptions();
 
-            setDataMap(dependecies, { data: result, loading: false, error: '' });
+            setDataMap(dependencies, { data: result, loading: false, error: '' });
         } catch (error) {
-            updateSupcruptions();
-            setDataMap(dependecies, { data: undefined, loading: false, error: error });
+            updateSubscriptions();
+            setDataMap(dependencies, { data: undefined, loading: false, error: error });
         }
     };
 
         fetchData();
     }, [fetchNemo]);
 
-    return getDataMap(dependecies);
+    return getDataMap(dependencies) || { data: undefined, loading: false };
 };
 
 export default useFetchData;
